@@ -11,11 +11,11 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.olx.permify.Permify
 import com.olx.permify.PermissionRequestBuilder
-import com.olx.permify.callback.PermissionCallback
+import com.olx.permify.callback.PermissionRequestCallback
 
 class InvisiblePermissionFragment : Fragment() {
 
-    private var permissionCallback: PermissionCallback? = null
+    private var permissionRequestCallback: PermissionRequestCallback? = null
 
     private lateinit var permissionRequestBuilder: PermissionRequestBuilder
 
@@ -39,8 +39,8 @@ class InvisiblePermissionFragment : Fragment() {
     private fun handlePermissionResult(result: Map<String, Boolean>) {
         permissionRequestBuilder.grantedPermissions.clear()
 
-        val showReasonList = ArrayList<String>()
-        val forwardList = ArrayList<String>()
+        val showReasonList = ArrayList<String>()  // temporary denied permissions
+        val forwardList = ArrayList<String>()  // permanent denied permissions
 
         processPermissions(result, showReasonList, forwardList)
         handleMediaPermissions()
@@ -79,7 +79,11 @@ class InvisiblePermissionFragment : Fragment() {
     ) {
         val getCaller = permissionRequestBuilder.getCallerFragmentOrActivity()
         if (isActivityOrFragmentAlive(getCaller)) {
-            permissionCallback?.onResult(granted, ArrayList(grantedPermissions), deniedPermissions)
+            permissionRequestCallback?.onResult(
+                granted,
+                ArrayList(grantedPermissions),
+                deniedPermissions
+            )
         }
     }
 
@@ -155,27 +159,40 @@ class InvisiblePermissionFragment : Fragment() {
         forwardList: MutableList<String>
     ) {
         if (showReasonList.isNotEmpty()) {
-            permissionRequestBuilder.showHandlePermissionDialog(
-                true,
-                ArrayList(permissionRequestBuilder.deniedPermissions)
-            )
+            if (permissionRequestBuilder.explainReasonCallbackWithBeforeParam != null) {
+                permissionRequestBuilder.explainReasonCallbackWithBeforeParam?.onTemporaryPermissionDenied(
+                    permissionRequestBuilder.deniedPermissions.toList()
+                )
+            } else {
+                permissionRequestBuilder.showHandlePermissionDialog(
+                    true,
+                    ArrayList(permissionRequestBuilder.deniedPermissions)
+                )
+            }
             permissionRequestBuilder.tempPermanentDeniedPermissions.addAll(forwardList)
         } else if (forwardList.isNotEmpty() || permissionRequestBuilder.tempPermanentDeniedPermissions.isNotEmpty()) {
             permissionRequestBuilder.tempPermanentDeniedPermissions.clear()
-            permissionRequestBuilder.showHandlePermissionDialog(
-                false,
-                ArrayList(permissionRequestBuilder.permanentDeniedPermissions)
-            )
+
+            if (permissionRequestBuilder.forwardToSettingsCallback != null) {
+                permissionRequestBuilder.forwardToSettingsCallback?.onPermanentPermissionDenied(
+                    permissionRequestBuilder.permanentDeniedPermissions.toList()
+                )
+            } else {
+                permissionRequestBuilder.showHandlePermissionDialog(
+                    false,
+                    ArrayList(permissionRequestBuilder.permanentDeniedPermissions)
+                )
+            }
         }
     }
 
     internal fun requestNow(
         permissions: List<String>,
-        permissionCallback: PermissionCallback,
+        permissionRequestCallback: PermissionRequestCallback?,
         permissionRequestBuilder: PermissionRequestBuilder,
     ) {
         this.permissionRequestBuilder = permissionRequestBuilder
-        this.permissionCallback = permissionCallback
+        this.permissionRequestCallback = permissionRequestCallback
         permissionLauncher.launch(permissions.toTypedArray())
     }
 

@@ -5,7 +5,9 @@ import android.os.Build
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
-import com.olx.permify.callback.PermissionCallback
+import com.olx.permify.callback.ForwardToSettingsCallback
+import com.olx.permify.callback.PermissionRequestCallback
+import com.olx.permify.callback.RationalPermissionCallback
 import com.olx.permify.dialog.AbstractDialog
 import com.olx.permify.dialog.PermissionDeniedDialog
 import com.olx.permify.fragment.InvisiblePermissionFragment
@@ -30,14 +32,25 @@ class PermissionRequestBuilder(
     internal val tempReadMediaPermissions: MutableSet<String> = LinkedHashSet()
     internal val tempPermanentDeniedPermissions: MutableSet<String> = LinkedHashSet()
 
-    private var requestMessage: String? = null
+    var explainReasonCallbackWithBeforeParam: RationalPermissionCallback? = null
+    var forwardToSettingsCallback: ForwardToSettingsCallback? = null
 
+    private var requestMessage: String? = null
     private var openSettingMessage: String? = null
 
     internal var forwardPermissions: MutableSet<String> = LinkedHashSet()
 
     fun displayPermissionDialogs(enablePermissionDialogs: Boolean): PermissionRequestBuilder {
         this.enablePermissionDialogs = enablePermissionDialogs
+        return this
+    }
+
+    fun setPermissionCallbacks(
+        explainReasonCallbackWithBeforeParam: RationalPermissionCallback?,
+        forwardToSettingsCallback: ForwardToSettingsCallback?
+    ): PermissionRequestBuilder {
+        this.explainReasonCallbackWithBeforeParam = explainReasonCallbackWithBeforeParam
+        this.forwardToSettingsCallback = forwardToSettingsCallback
         return this
     }
 
@@ -65,9 +78,9 @@ class PermissionRequestBuilder(
             return fragmentManager?.let { InvisiblePermissionFragment.getInstance(it) }
         }
 
-    fun buildAndRequest(permissionCallback: PermissionCallback) {
+    fun buildAndRequest(permissionRequestCallback: PermissionRequestCallback?) {
         validateBuilderState()
-        requestPermission(permissionCallback)
+        requestPermission(permissionRequestCallback)
     }
 
     private fun validateBuilderState() {
@@ -124,10 +137,10 @@ class PermissionRequestBuilder(
         }
     }
 
-    private fun requestPermission(permissionCallback: PermissionCallback) {
+    private fun requestPermission(permissionRequestCallback: PermissionRequestCallback?) {
         invisiblePermissionFragment?.requestNow(
             normalPermissions,
-            permissionCallback,
+            permissionRequestCallback,
             this
         )
     }
@@ -149,4 +162,5 @@ class PermissionRequestBuilder(
     fun getCallerFragmentOrActivity(): Any? {
         return fragment?.get() ?: fragmentActivity.get()
     }
+
 }
