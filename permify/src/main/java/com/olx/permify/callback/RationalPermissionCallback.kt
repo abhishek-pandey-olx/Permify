@@ -1,5 +1,5 @@
 package com.olx.permify.callback
 
 interface RationalPermissionCallback {
-    fun onTemporaryPermissionDenied(temporaryPermissionDenied: List<String>)
+    fun onRationalPermissionCallback(temporaryPermissionDenied: List<String>)
 }

@@ -5,10 +5,12 @@ import android.os.Build
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
-import com.olx.permify.callback.ForwardToSettingsCallback
+import com.olx.permify.callback.PermanentPermissionDeniedCallback
+import com.olx.permify.callback.PermissionDeniedCallback
 import com.olx.permify.callback.PermissionRequestCallback
 import com.olx.permify.callback.RationalPermissionCallback
 import com.olx.permify.dialog.AbstractDialog
+import com.olx.permify.dialog.DialogCallbacks
 import com.olx.permify.dialog.PermissionDeniedDialog
 import com.olx.permify.fragment.InvisiblePermissionFragment
 import com.olx.permify.utils.LOG_TAG
@@ -32,8 +34,11 @@ class PermissionRequestBuilder(
     internal val tempReadMediaPermissions: MutableSet<String> = LinkedHashSet()
     internal val tempPermanentDeniedPermissions: MutableSet<String> = LinkedHashSet()
 
+    var permissionDeniedCallback: PermissionDeniedCallback? = null
     var explainReasonCallbackWithBeforeParam: RationalPermissionCallback? = null
-    var forwardToSettingsCallback: ForwardToSettingsCallback? = null
+    var permanentPermissionDeniedCallback: PermanentPermissionDeniedCallback? = null
+
+    var dialogCallbacks: DialogCallbacks? = null
 
     private var requestMessage: String? = null
     private var openSettingMessage: String? = null
@@ -45,12 +50,19 @@ class PermissionRequestBuilder(
         return this
     }
 
+    fun setDialogCallback(dialogCallbacks: DialogCallbacks?): PermissionRequestBuilder {
+        this.dialogCallbacks = dialogCallbacks
+        return this
+    }
+
     fun setPermissionCallbacks(
+        permissionDeniedCallback: PermissionDeniedCallback?,
         explainReasonCallbackWithBeforeParam: RationalPermissionCallback?,
-        forwardToSettingsCallback: ForwardToSettingsCallback?
+        permanentPermissionDeniedCallback: PermanentPermissionDeniedCallback?
     ): PermissionRequestBuilder {
+        this.permissionDeniedCallback = permissionDeniedCallback
         this.explainReasonCallbackWithBeforeParam = explainReasonCallbackWithBeforeParam
-        this.forwardToSettingsCallback = forwardToSettingsCallback
+        this.permanentPermissionDeniedCallback = permanentPermissionDeniedCallback
         return this
     }
 
@@ -103,13 +115,18 @@ class PermissionRequestBuilder(
                 context.resources.getString(R.string.allow),
                 context.resources.getString(R.string.cancel)
             )
-            showAndHandlePermissionDialog(showReasonOrGoSettings, defaultDialog)
+            showAndHandlePermissionDialog(
+                showReasonOrGoSettings,
+                defaultDialog,
+                dialogCallbacks
+            )
         }
     }
 
     private fun showAndHandlePermissionDialog(
         showReasonOrGoSettings: Boolean,
-        dialog: AbstractDialog
+        dialog: AbstractDialog,
+        dialogCallbacks: DialogCallbacks?
     ) {
         val permissions = dialog.getPermissionList()
         if (permissions.isEmpty()) {
@@ -123,6 +140,7 @@ class PermissionRequestBuilder(
         positiveButton.isClickable = true
         positiveButton.setOnClickListener {
             dialog.dismiss()
+            dialogCallbacks?.onPositiveButtonClick()
             if (showReasonOrGoSettings) {
                 invisiblePermissionFragment?.requestAgain(permissions)
             } else {
@@ -132,6 +150,7 @@ class PermissionRequestBuilder(
         if (negativeButton != null) {
             negativeButton.isClickable = true
             negativeButton.setOnClickListener {
+                dialogCallbacks?.onNegativeButtonClick()
                 dialog.dismiss()
             }
         }

@@ -7,9 +7,11 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
-import com.olx.permify.callback.ForwardToSettingsCallback
+import com.olx.permify.callback.PermanentPermissionDeniedCallback
+import com.olx.permify.callback.PermissionDeniedCallback
 import com.olx.permify.callback.PermissionRequestCallback
 import com.olx.permify.callback.RationalPermissionCallback
+import com.olx.permify.dialog.DialogCallbacks
 import com.olx.permify.utils.Logger
 import com.olx.permify.utils.OPEN_SETTING_MESSAGE
 import com.olx.permify.utils.REQUEST_MESSAGE
@@ -21,9 +23,11 @@ object Permify {
     fun requestPermission(
         activity: FragmentActivity,
         permissions: List<String>,
-        forwardToSettingsCallback: ForwardToSettingsCallback? = null,
+        permissionDeniedCallback: PermissionDeniedCallback? = null,
+        permanentPermissionDeniedCallback: PermanentPermissionDeniedCallback? = null,
         rationalPermissionCallback: RationalPermissionCallback? = null,
         permissionRequestCallback: PermissionRequestCallback? = null,
+        dialogCallbacks: DialogCallbacks? = null,
         requestMessage: String = REQUEST_MESSAGE,
         openSettingMessage: String = OPEN_SETTING_MESSAGE,
         showDialogs: Boolean = true,
@@ -34,7 +38,12 @@ object Permify {
         val mutablePermissionList = permissions.toMutableList()
         PermissionRequestBuilder(weakActivity, null, mutablePermissionList)
             .displayPermissionDialogs(showDialogs)
-            .setPermissionCallbacks(rationalPermissionCallback, forwardToSettingsCallback)
+            .setPermissionCallbacks(
+                permissionDeniedCallback,
+                rationalPermissionCallback,
+                permanentPermissionDeniedCallback
+            )
+            .setDialogCallback(dialogCallbacks)
             .setPermissionRequestMessages(requestMessage, openSettingMessage)
             .buildAndRequest(permissionRequestCallback)
     }
@@ -43,9 +52,11 @@ object Permify {
     fun requestPermission(
         fragment: Fragment,
         permissions: List<String>,
+        permissionDeniedCallback: PermissionDeniedCallback? = null,
         rationalPermissionCallback: RationalPermissionCallback? = null,
-        forwardToSettingsCallback: ForwardToSettingsCallback? = null,
+        permanentPermissionDeniedCallback: PermanentPermissionDeniedCallback? = null,
         permissionRequestCallback: PermissionRequestCallback? = null,
+        dialogCallbacks: DialogCallbacks? = null,
         requestMessage: String = REQUEST_MESSAGE,
         openSettingMessage: String = OPEN_SETTING_MESSAGE,
         showDialogs: Boolean = true,
@@ -57,7 +68,12 @@ object Permify {
         val mutablePermissionList = permissions.toMutableList()
         return PermissionRequestBuilder(weakActivity, weakFragment, mutablePermissionList)
             .displayPermissionDialogs(showDialogs)
-            .setPermissionCallbacks(rationalPermissionCallback, forwardToSettingsCallback)
+            .setPermissionCallbacks(
+                permissionDeniedCallback,
+                rationalPermissionCallback,
+                permanentPermissionDeniedCallback
+            )
+            .setDialogCallback(dialogCallbacks)
             .setPermissionRequestMessages(requestMessage, openSettingMessage)
             .buildAndRequest(permissionRequestCallback)
     }
