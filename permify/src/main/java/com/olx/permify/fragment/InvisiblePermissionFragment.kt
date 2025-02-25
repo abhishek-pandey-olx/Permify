@@ -57,7 +57,7 @@ class InvisiblePermissionFragment : Fragment() {
                 deniedPermissions
             )
             return
-        } else if (permissionRequestBuilder.enablePermissionDialogs) {
+        } else {
             showHandlePermissionDialogIfNeeded(showReasonList, forwardList)
         }
 
@@ -163,7 +163,7 @@ class InvisiblePermissionFragment : Fragment() {
                 permissionRequestBuilder.explainReasonCallbackWithBeforeParam?.onTemporaryPermissionDenied(
                     permissionRequestBuilder.deniedPermissions.toList()
                 )
-            } else {
+            } else if (permissionRequestBuilder.enablePermissionDialogs) {
                 permissionRequestBuilder.showHandlePermissionDialog(
                     true,
                     ArrayList(permissionRequestBuilder.deniedPermissions)
@@ -172,12 +172,11 @@ class InvisiblePermissionFragment : Fragment() {
             permissionRequestBuilder.tempPermanentDeniedPermissions.addAll(forwardList)
         } else if (forwardList.isNotEmpty() || permissionRequestBuilder.tempPermanentDeniedPermissions.isNotEmpty()) {
             permissionRequestBuilder.tempPermanentDeniedPermissions.clear()
-
             if (permissionRequestBuilder.forwardToSettingsCallback != null) {
                 permissionRequestBuilder.forwardToSettingsCallback?.onPermanentPermissionDenied(
                     permissionRequestBuilder.permanentDeniedPermissions.toList()
                 )
-            } else {
+            } else if (permissionRequestBuilder.enablePermissionDialogs) {
                 permissionRequestBuilder.showHandlePermissionDialog(
                     false,
                     ArrayList(permissionRequestBuilder.permanentDeniedPermissions)
