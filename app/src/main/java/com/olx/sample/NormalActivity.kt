@@ -34,18 +34,12 @@ class NormalActivity : AppCompatActivity(), PermissionRequestCallback {
                 permissions = listOf(Manifest.permission.POST_NOTIFICATIONS),
                 rationalPermissionCallback = object : RationalPermissionCallback {
                     override fun onTemporaryPermissionDenied(temporaryPermissionDenied: List<String>) {
-                        Log.e(
-                            "Permify + onTemporaryPermissionDenied ",
-                            temporaryPermissionDenied.toString()
-                        )
+                        Log.e("Permify  ", "RationalPermissionCallback")
                     }
                 },
                 forwardToSettingsCallback = object : ForwardToSettingsCallback {
                     override fun onPermanentPermissionDenied(permanentPermissionDenied: List<String>) {
-                        Log.e(
-                            "Permify + ForwardToSettingsCallback",
-                            permanentPermissionDenied.toString()
-                        )
+                        Log.e("Permify  ", "ForwardToSettingsCallback")
                     }
                 },
                 permissionRequestCallback = object : PermissionRequestCallback {
@@ -75,18 +69,12 @@ class NormalActivity : AppCompatActivity(), PermissionRequestCallback {
                 openSettingMessage = "Please allow following permissions in settings",
                 rationalPermissionCallback = object : RationalPermissionCallback {
                     override fun onTemporaryPermissionDenied(temporaryPermissionDenied: List<String>) {
-                        Log.e(
-                            "Permify + onTemporaryPermissionDenied ",
-                            temporaryPermissionDenied.toString()
-                        )
+                        Log.e("Permify  ", "RationalPermissionCallback")
                     }
                 },
                 forwardToSettingsCallback = object : ForwardToSettingsCallback {
                     override fun onPermanentPermissionDenied(permanentPermissionDenied: List<String>) {
-                        Log.e(
-                            "Permify + ForwardToSettingsCallback",
-                            permanentPermissionDenied.toString()
-                        )
+                        Log.e("Permify  ", "ForwardToSettingsCallback")
                     }
                 },
                 permissionRequestCallback = object : PermissionRequestCallback {
