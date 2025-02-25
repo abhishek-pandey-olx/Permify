@@ -176,6 +176,7 @@ class InvisiblePermissionFragment : Fragment() {
                 true,
                 isPermissionRational
             )
+            return
         }
     }
 
@@ -206,9 +207,8 @@ class InvisiblePermissionFragment : Fragment() {
         val isPermissionRational = isPermissionRational(permissions)
         if (isPermissionRational.isNotEmpty()) {
             processRationalePermissions(isPermissionRational)
-        } else {
-            permissionLauncher.launch(permissions.toTypedArray())
         }
+        permissionLauncher.launch(permissions.toTypedArray())
     }
 
     private fun isPermissionRational(permissions: List<String>): List<String> {
