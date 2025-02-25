@@ -1,5 +1,5 @@
 package com.olx.permify.callback
 
-interface ForwardToSettingsCallback {
+interface PermanentPermissionDeniedCallback {
     fun onPermanentPermissionDenied(permanentPermissionDenied: List<String>)
 }

@@ -58,7 +58,7 @@ class InvisiblePermissionFragment : Fragment() {
             )
             return
         } else {
-            showHandlePermissionDialogIfNeeded(showReasonList, forwardList)
+            handlePermissionDialogsAndCallbacks(showReasonList, forwardList)
         }
 
         val deniedList = ArrayList<String>()
@@ -154,26 +154,37 @@ class InvisiblePermissionFragment : Fragment() {
         }
     }
 
-    private fun showHandlePermissionDialogIfNeeded(
+    private fun handlePermissionDialogsAndCallbacks(
         showReasonList: MutableList<String>,
         forwardList: MutableList<String>
     ) {
         if (showReasonList.isNotEmpty()) {
-            if (permissionRequestBuilder.explainReasonCallbackWithBeforeParam != null) {
-                permissionRequestBuilder.explainReasonCallbackWithBeforeParam?.onTemporaryPermissionDenied(
-                    permissionRequestBuilder.deniedPermissions.toList()
-                )
-            } else if (permissionRequestBuilder.enablePermissionDialogs) {
-                permissionRequestBuilder.showHandlePermissionDialog(
-                    true,
-                    ArrayList(permissionRequestBuilder.deniedPermissions)
-                )
-            }
+            permissionRequestBuilder.permissionDeniedCallback?.onPermissionDenied(showReasonList)
             permissionRequestBuilder.tempPermanentDeniedPermissions.addAll(forwardList)
-        } else if (forwardList.isNotEmpty() || permissionRequestBuilder.tempPermanentDeniedPermissions.isNotEmpty()) {
+        } else {
+            processPermanentDeniedPermissions(forwardList)
+        }
+    }
+
+    private fun processRationalePermissions(isPermissionRational: List<String>) {
+        if (permissionRequestBuilder.explainReasonCallbackWithBeforeParam != null) {
+            permissionRequestBuilder.explainReasonCallbackWithBeforeParam?.onRationalPermissionCallback(
+                isPermissionRational
+            )
+        } else if (permissionRequestBuilder.enablePermissionDialogs) {
+            permissionRequestBuilder.showHandlePermissionDialog(
+                true,
+                isPermissionRational
+            )
+        }
+    }
+
+    private fun processPermanentDeniedPermissions(forwardList: MutableList<String>) {
+        if (forwardList.isNotEmpty() || permissionRequestBuilder.tempPermanentDeniedPermissions.isNotEmpty()) {
             permissionRequestBuilder.tempPermanentDeniedPermissions.clear()
-            if (permissionRequestBuilder.forwardToSettingsCallback != null) {
-                permissionRequestBuilder.forwardToSettingsCallback?.onPermanentPermissionDenied(
+
+            if (permissionRequestBuilder.permanentPermissionDeniedCallback != null) {
+                permissionRequestBuilder.permanentPermissionDeniedCallback?.onPermanentPermissionDenied(
                     permissionRequestBuilder.permanentDeniedPermissions.toList()
                 )
             } else if (permissionRequestBuilder.enablePermissionDialogs) {
@@ -192,7 +203,18 @@ class InvisiblePermissionFragment : Fragment() {
     ) {
         this.permissionRequestBuilder = permissionRequestBuilder
         this.permissionRequestCallback = permissionRequestCallback
-        permissionLauncher.launch(permissions.toTypedArray())
+        val isPermissionRational = isPermissionRational(permissions)
+        if (isPermissionRational.isNotEmpty()) {
+            processRationalePermissions(isPermissionRational)
+        } else {
+            permissionLauncher.launch(permissions.toTypedArray())
+        }
+    }
+
+    private fun isPermissionRational(permissions: List<String>): List<String> {
+        return permissions.filter { permission ->
+            shouldShowRequestPermissionRationale(permission)
+        }
     }
 
     fun requestAgain(
