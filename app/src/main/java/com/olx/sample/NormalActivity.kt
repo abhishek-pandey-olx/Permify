@@ -7,7 +7,9 @@ import android.view.View
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import com.olx.permify.Permify
+import com.olx.permify.callback.ForwardToSettingsCallback
 import com.olx.permify.callback.PermissionRequestCallback
+import com.olx.permify.callback.RationalPermissionCallback
 import com.olx.sample.databinding.ActivityNormalBinding
 
 class NormalActivity : AppCompatActivity(), PermissionRequestCallback {
@@ -30,6 +32,22 @@ class NormalActivity : AppCompatActivity(), PermissionRequestCallback {
                 activity = this,
                 showDialogs = false,
                 permissions = listOf(Manifest.permission.POST_NOTIFICATIONS),
+                rationalPermissionCallback = object : RationalPermissionCallback {
+                    override fun onTemporaryPermissionDenied(temporaryPermissionDenied: List<String>) {
+                        Log.e(
+                            "Permify + onTemporaryPermissionDenied ",
+                            temporaryPermissionDenied.toString()
+                        )
+                    }
+                },
+                forwardToSettingsCallback = object : ForwardToSettingsCallback {
+                    override fun onPermanentPermissionDenied(permanentPermissionDenied: List<String>) {
+                        Log.e(
+                            "Permify + ForwardToSettingsCallback",
+                            permanentPermissionDenied.toString()
+                        )
+                    }
+                },
                 permissionRequestCallback = object : PermissionRequestCallback {
                     override fun onResult(
                         allGranted: Boolean,
@@ -55,6 +73,22 @@ class NormalActivity : AppCompatActivity(), PermissionRequestCallback {
                 ),
                 requestMessage = "OLX needs following permissions to continue",
                 openSettingMessage = "Please allow following permissions in settings",
+                rationalPermissionCallback = object : RationalPermissionCallback {
+                    override fun onTemporaryPermissionDenied(temporaryPermissionDenied: List<String>) {
+                        Log.e(
+                            "Permify + onTemporaryPermissionDenied ",
+                            temporaryPermissionDenied.toString()
+                        )
+                    }
+                },
+                forwardToSettingsCallback = object : ForwardToSettingsCallback {
+                    override fun onPermanentPermissionDenied(permanentPermissionDenied: List<String>) {
+                        Log.e(
+                            "Permify + ForwardToSettingsCallback",
+                            permanentPermissionDenied.toString()
+                        )
+                    }
+                },
                 permissionRequestCallback = object : PermissionRequestCallback {
                     override fun onResult(
                         allGranted: Boolean,

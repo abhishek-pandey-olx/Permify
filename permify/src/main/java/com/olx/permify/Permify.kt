@@ -22,7 +22,7 @@ object Permify {
         activity: FragmentActivity,
         permissions: List<String>,
         forwardToSettingsCallback: ForwardToSettingsCallback? = null,
-        explainReasonCallbackWithBeforeParam: RationalPermissionCallback? = null,
+        rationalPermissionCallback: RationalPermissionCallback? = null,
         permissionRequestCallback: PermissionRequestCallback? = null,
         requestMessage: String = REQUEST_MESSAGE,
         openSettingMessage: String = OPEN_SETTING_MESSAGE,
@@ -34,7 +34,7 @@ object Permify {
         val mutablePermissionList = permissions.toMutableList()
         PermissionRequestBuilder(weakActivity, null, mutablePermissionList)
             .displayPermissionDialogs(showDialogs)
-            .setPermissionCallbacks(explainReasonCallbackWithBeforeParam, forwardToSettingsCallback)
+            .setPermissionCallbacks(rationalPermissionCallback, forwardToSettingsCallback)
             .setPermissionRequestMessages(requestMessage, openSettingMessage)
             .buildAndRequest(permissionRequestCallback)
     }
@@ -43,7 +43,7 @@ object Permify {
     fun requestPermission(
         fragment: Fragment,
         permissions: List<String>,
-        explainReasonCallbackWithBeforeParam: RationalPermissionCallback? = null,
+        rationalPermissionCallback: RationalPermissionCallback? = null,
         forwardToSettingsCallback: ForwardToSettingsCallback? = null,
         permissionRequestCallback: PermissionRequestCallback? = null,
         requestMessage: String = REQUEST_MESSAGE,
@@ -57,7 +57,7 @@ object Permify {
         val mutablePermissionList = permissions.toMutableList()
         return PermissionRequestBuilder(weakActivity, weakFragment, mutablePermissionList)
             .displayPermissionDialogs(showDialogs)
-            .setPermissionCallbacks(explainReasonCallbackWithBeforeParam, forwardToSettingsCallback)
+            .setPermissionCallbacks(rationalPermissionCallback, forwardToSettingsCallback)
             .setPermissionRequestMessages(requestMessage, openSettingMessage)
             .buildAndRequest(permissionRequestCallback)
     }
